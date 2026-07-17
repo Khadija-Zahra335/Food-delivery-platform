@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+// This tells Prisma "after I read the schema, generate a JavaScript library based on it."
+//That generated library is literally what you'll import in your code later to run things like prisma.restaurant.create(...).
+// The output path is just where that generated code gets saved on disk — you'll basically never touch it directly.
+generator client {
+  provider = "prisma-client-js"
+}
+
+//This says "the database is PostgreSQL." 
+//Notice it doesn't have the connection string hardcoded here — 
+//that's because Prisma reads DATABASE_URL from .env at runtime 
+//(that's the whole reason .env exists, tying back to what we just set up).
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Restaurant {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  cuisineType String
+  isOpen      Boolean  @default(true)
+  address     String
+  menuItems   MenuItem[]
+  orders      Order[]
+}
+model Category{
+  id          Int @id @default(autoincrement())
+  name        String
+  menuItems   MenuItem[]
+}
+
+model MenuItem {
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String?
+  price        Decimal
+  isAvailable  Boolean  @default(true)
+  categoryId   Int
+  category     Category @relation(fields: [categoryId], references: [id])
+  restaurantId Int
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  orderItems  OrderItem[]
+
+}
+
+model Customer{
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String @unique
+  addresses      Address[]
+  orders        Order[]
+  reviews       Review[]
+
+}
+
+model Address{
+  id            Int      @id @default(autoincrement())
+  street        String
+  city          String
+  customerId    Int
+  customer      Customer @relation(fields : [customerId] , references : [id])
+}
+
+model Rider{
+  id             Int      @id @default(autoincrement())
+  name           String
+  phoneNo        String
+  isAvailable    Boolean @default(true)
+  orders          Order[]
+}
+
+enum OrderStatus {
+  PLACED
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model Order{
+  id              Int      @id @default(autoincrement())
+  customerId      Int
+  customer        Customer @relation(fields : [customerId] , references: [id])
+  
+  restaurantId    Int
+  restaurant      Restaurant @relation(fields: [restaurantId], references: [id])
+
+  riderId Int?
+  rider   Rider? @relation(fields: [riderId], references: [id])
+  status  OrderStatus @default(PLACED)
+  createdAt DateTime @default(now())
+
+  orderitems       OrderItem[]
+  reviews         Review[]
+
+}
+
+
+model OrderItem{
+
+  id            Int       @id @default(autoincrement())
+  orderId       Int
+  order         Order     @relation(fields: [orderId], references: [id])
+  menuItemId    Int
+  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id])
+  quantity      Int
+  priceAtOrder  Decimal
+
+
+}
+
+
+enum TargetType {
+    RESTAURANT
+    RIDER
+}
+
+
+model Review{
+
+  id            Int       @id @default(autoincrement())
+  customerId    Int
+  customer      Customer @relation(fields : [customerId] , references: [id])
+  orderId       Int
+  order         Order     @relation(fields: [orderId], references: [id])
+  targetType    TargetType @default(RESTAURANT) 
+  rating        Int
+  comment       String?
+  
+}
