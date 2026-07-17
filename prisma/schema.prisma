@@ -6,8 +6,15 @@
 // This tells Prisma "after I read the schema, generate a JavaScript library based on it."
 //That generated library is literally what you'll import in your code later to run things like prisma.restaurant.create(...).
 // The output path is just where that generated code gets saved on disk — you'll basically never touch it directly.
+
 generator client {
   provider = "prisma-client-js"
+}
+
+//This tells Prisma: "in addition to generating the JS client, also generate a diagram, and save it as ERD.svg at the project root."
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
 }
 
 //This says "the database is PostgreSQL." 
