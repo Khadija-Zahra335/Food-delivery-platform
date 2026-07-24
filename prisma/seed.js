@@ -4,12 +4,25 @@ const { PrismaPg } = require('@prisma/adapter-pg');
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+
+ 
 // Since database calls take time (they're not instant like normal JS),
 // Prisma functions are asynchronous — they return Promises.
 // That means our seeding logic needs to live inside an async function,
 // and every database call needs an await in front of it.
 
 async function main() {
+
+  await prisma.review.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.address.deleteMany();
+  await prisma.menuItem.deleteMany();
+  await prisma.rider.deleteMany();
+  await prisma.customer.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.restaurant.deleteMany();
+
   // Restaurant Data
   const restaurant1 = await prisma.restaurant.create({
     data: {
