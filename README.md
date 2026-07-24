@@ -120,7 +120,7 @@ The API runs at `http://localhost:3000` by default.
 ### API Documentation
 
 - **Interactive (Swagger UI):** once the server is running, visit `http://localhost:3000/api-docs` to browse every endpoint and send live test requests directly from the browser.
-- **Postman:** import [`docs/postman_collection.json`](./docs/postman_collection.json) into Postman to explore and run every endpoint with example request bodies.
+
 
 ## Entity-Relationship Diagram
 
