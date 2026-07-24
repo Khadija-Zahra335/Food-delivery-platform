@@ -36,7 +36,8 @@ app.use('/categories', categoryRoutes);
 app.use('/customers', customerRoutes);
 app.use('/riders', riderRoutes);
 app.use('/orders', orderRoutes);
-app.use(errorHandler);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(errorHandler);
+
 
 export default app;
