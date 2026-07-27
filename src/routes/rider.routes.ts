@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate';
+import { authenticate } from '../middleware/authenticate';
+import { authorize } from '../middleware/authorize';
 import { createRiderSchema } from '../validators/rider.validator';
 import {
   getAllRiders,
@@ -15,20 +17,28 @@ const router = Router();
  * @openapi
  * /riders:
  *   get:
- *     summary: Get all riders
+ *     summary: Get all riders (admins and restaurant owners only)
  *     tags: [Riders]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of riders
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  */
-router.get('/', getAllRiders);
+router.get('/', authenticate, authorize('ADMIN', 'RESTAURANT_OWNER'), getAllRiders);
 
 /**
  * @openapi
  * /riders/{id}:
  *   get:
- *     summary: Get a rider by ID
+ *     summary: Get a rider by ID (authenticated users only)
  *     tags: [Riders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -38,17 +48,21 @@ router.get('/', getAllRiders);
  *     responses:
  *       200:
  *         description: The rider
+ *       401:
+ *         description: No token provided
  *       404:
  *         description: Rider not found
  */
-router.get('/:id', getRiderById);
+router.get('/:id', authenticate, getRiderById);
 
 /**
  * @openapi
  * /riders:
  *   post:
- *     summary: Create a new rider
+ *     summary: Create a new rider (admins only)
  *     tags: [Riders]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -68,15 +82,21 @@ router.get('/:id', getRiderById);
  *         description: Rider created
  *       400:
  *         description: Validation failed
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  */
-router.post('/', validate(createRiderSchema), createRider);
+router.post('/', authenticate, authorize('ADMIN'), validate(createRiderSchema), createRider);
 
 /**
  * @openapi
  * /riders/{id}:
  *   put:
- *     summary: Update a rider
+ *     summary: Update a rider (riders and admins only)
  *     tags: [Riders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -98,17 +118,23 @@ router.post('/', validate(createRiderSchema), createRider);
  *     responses:
  *       200:
  *         description: Rider updated
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  *       404:
  *         description: Rider not found
  */
-router.put('/:id', updateRider);
+router.put('/:id', authenticate, authorize('RIDER', 'ADMIN'), updateRider);
 
 /**
  * @openapi
  * /riders/{id}:
  *   delete:
- *     summary: Delete a rider
+ *     summary: Delete a rider (admins only)
  *     tags: [Riders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -118,11 +144,15 @@ router.put('/:id', updateRider);
  *     responses:
  *       204:
  *         description: Rider deleted
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  *       404:
  *         description: Rider not found
  *       409:
  *         description: Rider has delivery history and cannot be deleted
  */
-router.delete('/:id', deleteRider);
+router.delete('/:id', authenticate, authorize('ADMIN'), deleteRider);
 
 export default router;

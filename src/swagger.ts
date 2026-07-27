@@ -6,11 +6,20 @@ const options: swaggerJsdoc.Options = {
     info: {
       title: 'Food Delivery Platform API',
       version: '1.0.0',
-      description: 'REST API for a multi-vendor food delivery platform — restaurants, menu items, customers, orders, riders, and reviews.',
+      description: 'REST API for a multi-vendor food delivery platform.',
     },
     servers: [{ url: 'http://localhost:3000' }],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
-  apis: ['./src/routes/*.ts'], // where swagger-jsdoc looks for the comments
+  apis: ['./src/routes/*.ts'],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate';
 import { createRestaurantSchema } from '../validators/restaurant.validator';
+import { authenticate } from '../middleware/authenticate';
+import { authorize } from '../middleware/authorize';
+
 
 import {
   getAllRestaurants,
@@ -51,6 +54,8 @@ router.get('/:id', getRestaurantById);
  *   post:
  *     summary: Create a new restaurant
  *     tags: [Restaurants]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -74,9 +79,13 @@ router.get('/:id', getRestaurantById);
  *         description: Restaurant created
  *       400:
  *         description: Validation failed
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  */
 
-router.post('/', validate(createRestaurantSchema), createRestaurant);
+router.post('/', authenticate, authorize('RESTAURANT_OWNER','ADMIN'), validate(createRestaurantSchema), createRestaurant);
 
 /**
  * @openapi
@@ -84,6 +93,8 @@ router.post('/', validate(createRestaurantSchema), createRestaurant);
  *   put:
  *     summary: Update a restaurant
  *     tags: [Restaurants]
+ *    security:
+ *    - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -101,12 +112,19 @@ router.post('/', validate(createRestaurantSchema), createRestaurant);
  *               isOpen:
  *                 type: boolean
  *     responses:
+ * 
  *       200:
  *         description: Restaurant updated
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
+ *     
  *       404:
  *         description: Restaurant not found
  */
-router.put('/:id', updateRestaurant);
+router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), updateRestaurant);
+
 
 /**
  * @openapi
@@ -114,6 +132,8 @@ router.put('/:id', updateRestaurant);
  *   delete:
  *     summary: Delete a restaurant
  *     tags: [Restaurants]
+ *    security:
+ *   - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -121,14 +141,18 @@ router.put('/:id', updateRestaurant);
  *         schema:
  *           type: integer
  *     responses:
- *       204:
- *         description: Restaurant deleted
- *       404:
- *         description: Restaurant not found
- *       409:
- *         description: Restaurant has menu items and cannot be deleted
+ *         204:
+ *            description: Restaurant deleted
+ *          401:
+  *           description: No token provided
+ *          403:
+ *            description: Insufficient permissions
+ *          404:
+ *            description: Restaurant not found
+ *          409:
+ *            description: Restaurant has menu items and cannot be deleted
  */
-router.delete('/:id', deleteRestaurant);
+router.delete('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), deleteRestaurant);
 
 
 
