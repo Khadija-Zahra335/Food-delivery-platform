@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate';
+import { authenticate } from '../middleware/authenticate';
+import { authorize } from '../middleware/authorize';
 import { createOrderSchema } from '../validators/order.validator';
 import {
   getAllOrders,
@@ -15,20 +17,28 @@ const router = Router();
  * @openapi
  * /orders:
  *   get:
- *     summary: Get all orders
+ *     summary: Get all orders (admins only)
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: A list of orders, each including customer, restaurant, rider, and order items
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  */
-router.get('/', getAllOrders);
+router.get('/', authenticate, authorize('ADMIN'), getAllOrders);
 
 /**
  * @openapi
  * /orders/{id}:
  *   get:
- *     summary: Get an order by ID
+ *     summary: Get an order by ID (authenticated users only)
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -38,17 +48,21 @@ router.get('/', getAllOrders);
  *     responses:
  *       200:
  *         description: The order
+ *       401:
+ *         description: No token provided
  *       404:
  *         description: Order not found
  */
-router.get('/:id', getOrderById);
+router.get('/:id', authenticate, getOrderById);
 
 /**
  * @openapi
  * /orders:
  *   post:
- *     summary: Place a new order (creates the order and its items together, atomically)
+ *     summary: Place a new order (customers only) — creates the order and its items atomically
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -79,15 +93,21 @@ router.get('/:id', getOrderById);
  *         description: Order placed, including its created order items
  *       400:
  *         description: Validation failed
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  */
-router.post('/', validate(createOrderSchema), createOrder);
+router.post('/', authenticate, authorize('CUSTOMER'), validate(createOrderSchema), createOrder);
 
 /**
  * @openapi
  * /orders/{id}:
  *   put:
- *     summary: Update an order's status and/or assign a rider
+ *     summary: Update an order's status and/or assign a rider (owners, riders, admins)
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -108,10 +128,14 @@ router.post('/', validate(createOrderSchema), createOrder);
  *     responses:
  *       200:
  *         description: Order updated
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  *       404:
  *         description: Order not found
  */
-router.put('/:id', updateOrder);
+router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'RIDER', 'ADMIN'), updateOrder);
 
 /**
  * @openapi
@@ -119,6 +143,8 @@ router.put('/:id', updateOrder);
  *   delete:
  *     summary: Orders cannot be deleted — use PUT to set status to CANCELLED instead
  *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -126,11 +152,13 @@ router.put('/:id', updateOrder);
  *         schema:
  *           type: integer
  *     responses:
+ *       401:
+ *         description: No token provided
  *       403:
  *         description: Deletion is not permitted for orders
  *       404:
  *         description: Order not found
  */
-router.delete('/:id', deleteOrder);
+router.delete('/:id', authenticate, deleteOrder);
 
 export default router;

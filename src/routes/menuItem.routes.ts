@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate';
+import { authenticate } from '../middleware/authenticate';
+import { authorize } from '../middleware/authorize';
 import { createMenuItemSchema } from '../validators/menuItem.validator';
 import {
   getAllMenuItems,
@@ -15,7 +17,7 @@ const router = Router();
  * @openapi
  * /menu-items:
  *   get:
- *     summary: Get all menu items
+ *     summary: Get all menu items (public)
  *     tags: [MenuItems]
  *     responses:
  *       200:
@@ -27,7 +29,7 @@ router.get('/', getAllMenuItems);
  * @openapi
  * /menu-items/{id}:
  *   get:
- *     summary: Get a menu item by ID
+ *     summary: Get a menu item by ID (public)
  *     tags: [MenuItems]
  *     parameters:
  *       - in: path
@@ -47,8 +49,10 @@ router.get('/:id', getMenuItemById);
  * @openapi
  * /menu-items:
  *   post:
- *     summary: Create a new menu item
+ *     summary: Create a new menu item (restaurant owners and admins only)
  *     tags: [MenuItems]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -74,15 +78,21 @@ router.get('/:id', getMenuItemById);
  *         description: Menu item created
  *       400:
  *         description: Validation failed
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  */
-router.post('/', validate(createMenuItemSchema), createMenuItem);
+router.post('/', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), validate(createMenuItemSchema), createMenuItem);
 
 /**
  * @openapi
  * /menu-items/{id}:
  *   put:
- *     summary: Update a menu item
+ *     summary: Update a menu item (restaurant owners and admins only)
  *     tags: [MenuItems]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -110,17 +120,23 @@ router.post('/', validate(createMenuItemSchema), createMenuItem);
  *     responses:
  *       200:
  *         description: Menu item updated
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  *       404:
  *         description: Menu item not found
  */
-router.put('/:id', updateMenuItem);
+router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), updateMenuItem);
 
 /**
  * @openapi
  * /menu-items/{id}:
  *   delete:
- *     summary: Delete a menu item
+ *     summary: Delete a menu item (restaurant owners and admins only)
  *     tags: [MenuItems]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -130,9 +146,13 @@ router.put('/:id', updateMenuItem);
  *     responses:
  *       204:
  *         description: Menu item deleted
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
  *       404:
  *         description: Menu item not found
  */
-router.delete('/:id', deleteMenuItem);
+router.delete('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), deleteMenuItem);
 
 export default router;
