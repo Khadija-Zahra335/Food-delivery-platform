@@ -35,6 +35,9 @@ model Restaurant {
   address     String
   menuItems   MenuItem[]
   orders      Order[]
+  ownerId Int?  @unique
+  owner   User? @relation(fields: [ownerId], references: [id])
+
 }
 model Category{
   id          Int @id @default(autoincrement())
@@ -64,6 +67,8 @@ model Customer{
   addresses      Address[]
   orders        Order[]
   reviews       Review[]
+  userId        Int?  @unique
+  user   User? @relation(fields: [userId], references: [id])
 
 }
 
@@ -81,6 +86,8 @@ model Rider{
   phoneNo        String
   isAvailable    Boolean @default(true)
   orders          Order[]
+  userId Int?  @unique
+  user   User? @relation(fields: [userId], references: [id])
 }
 
 enum OrderStatus {
@@ -141,4 +148,27 @@ model Review{
   rating        Int
   comment       String?
   
+}
+
+
+
+enum Role{
+  CUSTOMER
+  RESTAURANT_OWNER
+  ADMIN
+  RIDER
+}
+
+model User{
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+
+  customer   Customer?
+  restaurant Restaurant?
+  rider      Rider?
+
 }
