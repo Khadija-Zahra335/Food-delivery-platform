@@ -17,7 +17,7 @@ import { errorHandler } from './middleware/errorHandler';
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 
-
+import authRoutes from './routes/auth.routes';
 
 
 // Create an Express application
@@ -37,6 +37,7 @@ app.use('/customers', customerRoutes);
 app.use('/riders', riderRoutes);
 app.use('/orders', orderRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/auth', authRoutes);
 app.use(errorHandler);
 
 
