@@ -3,8 +3,6 @@ import { validate } from '../middleware/validate';
 import { createRestaurantSchema } from '../validators/restaurant.validator';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
-
-
 import {
   getAllRestaurants,
   getRestaurantById,
@@ -15,12 +13,11 @@ import {
 
 const router = Router();
 
-
 /**
  * @openapi
  * /restaurants:
  *   get:
- *     summary: Get all restaurants
+ *     summary: Get all restaurants (public)
  *     tags: [Restaurants]
  *     responses:
  *       200:
@@ -32,7 +29,7 @@ router.get('/', getAllRestaurants);
  * @openapi
  * /restaurants/{id}:
  *   get:
- *     summary: Get a restaurant by ID
+ *     summary: Get a restaurant by ID (public)
  *     tags: [Restaurants]
  *     parameters:
  *       - in: path
@@ -52,7 +49,7 @@ router.get('/:id', getRestaurantById);
  * @openapi
  * /restaurants:
  *   post:
- *     summary: Create a new restaurant
+ *     summary: Create a new restaurant (restaurant owners and admins only)
  *     tags: [Restaurants]
  *     security:
  *       - bearerAuth: []
@@ -84,17 +81,16 @@ router.get('/:id', getRestaurantById);
  *       403:
  *         description: Insufficient permissions
  */
-
-router.post('/', authenticate, authorize('RESTAURANT_OWNER','ADMIN'), validate(createRestaurantSchema), createRestaurant);
+router.post('/', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), validate(createRestaurantSchema), createRestaurant);
 
 /**
  * @openapi
  * /restaurants/{id}:
  *   put:
- *     summary: Update a restaurant
+ *     summary: Update a restaurant (restaurant owners and admins only)
  *     tags: [Restaurants]
- *    security:
- *    - bearerAuth: []
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -109,31 +105,34 @@ router.post('/', authenticate, authorize('RESTAURANT_OWNER','ADMIN'), validate(c
  *             properties:
  *               name:
  *                 type: string
+ *               description:
+ *                 type: string
+ *               cuisineType:
+ *                 type: string
  *               isOpen:
  *                 type: boolean
+ *               address:
+ *                 type: string
  *     responses:
- * 
  *       200:
  *         description: Restaurant updated
  *       401:
  *         description: No token provided
  *       403:
  *         description: Insufficient permissions
- *     
  *       404:
  *         description: Restaurant not found
  */
 router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), updateRestaurant);
 
-
 /**
  * @openapi
  * /restaurants/{id}:
  *   delete:
- *     summary: Delete a restaurant
+ *     summary: Delete a restaurant (restaurant owners and admins only)
  *     tags: [Restaurants]
- *    security:
- *   - bearerAuth: []
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -141,20 +140,17 @@ router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), updateR
  *         schema:
  *           type: integer
  *     responses:
- *         204:
- *            description: Restaurant deleted
- *          401:
-  *           description: No token provided
- *          403:
- *            description: Insufficient permissions
- *          404:
- *            description: Restaurant not found
- *          409:
- *            description: Restaurant has menu items and cannot be deleted
+ *       204:
+ *         description: Restaurant deleted
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
+ *       404:
+ *         description: Restaurant not found
+ *       409:
+ *         description: Restaurant has menu items and cannot be deleted
  */
 router.delete('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), deleteRestaurant);
-
-
-
 
 export default router;
