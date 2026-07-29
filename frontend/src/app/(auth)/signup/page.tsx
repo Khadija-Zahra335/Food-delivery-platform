@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import BrandLogo from '../../../components/BrandLogo';
+import ErrorAlert from '../../../components/ErrorAlert';
+import PasswordInput from '../../../components/PasswordInput';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -11,7 +14,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('CUSTOMER');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,48 +67,19 @@ export default function SignupPage() {
     >
       <div className="absolute inset-0 bg-brand-900/70" aria-hidden="true" />
 
-      <div className="relative w-full max-w-sm rounded-2xl bg-white px-7 py-8 shadow-2xl">
-        <div className="flex items-center justify-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-brand-400 text-white">
-            <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
-              <path
-                d="M4 11h16M6 11a6 6 0 0 1 12 0M5 15h14a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3Z"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <span className="text-lg font-semibold tracking-tight text-brand-900">
-            Foodly
-          </span>
-        </div>
+      <div className="relative w-full max-w-sm rounded-2xl bg-white px-7 py-6 shadow-2xl">
+        <BrandLogo />
 
-        <h1 className="mt-6 text-center text-2xl font-semibold tracking-tight text-brand-900">
+        <h1 className="mt-5 text-center text-2xl font-semibold tracking-tight text-brand-900">
           Create your account
         </h1>
         <p className="mt-1.5 text-center text-sm text-ink-muted">
           Order, deliver, or manage a restaurant.
         </p>
 
-        {error && (
-          <div
-            role="alert"
-            className="mt-5 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700"
-          >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 shrink-0">
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm.75-11.25a.75.75 0 0 0-1.5 0v3.5a.75.75 0 0 0 1.5 0v-3.5ZM10 14a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <span>{error}</span>
-          </div>
-        )}
+        {error && <ErrorAlert message={error} />}
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-3.5">
+        <form onSubmit={handleSubmit} className="mt-5 space-y-3">
           <div>
             <label htmlFor="name" className={labelClasses}>
               Full name
@@ -143,44 +116,14 @@ export default function SignupPage() {
             <label htmlFor="password" className={labelClasses}>
               Password
             </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="new-password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                className={`${inputClasses} pr-11`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute inset-y-0 right-0 grid w-11 place-items-center text-ink-muted transition hover:text-brand-600"
-              >
-                <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" aria-hidden="true">
-                  {showPassword ? (
-                    <path
-                      d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.4 5.2A9.5 9.5 0 0112 5c5 0 9 4.5 9 7a11 11 0 01-2.3 3.3M6.2 6.7A11.6 11.6 0 003 12c0 2.5 4 7 9 7a9.6 9.6 0 003.6-.7"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                    />
-                  ) : (
-                    <>
-                      <path
-                        d="M3 12s3.6-7 9-7 9 7 9 7-3.6 7-9 7-9-7-9-7Z"
-                        stroke="currentColor"
-                        strokeWidth="1.6"
-                      />
-                      <circle cx="12" cy="12" r="2.6" stroke="currentColor" strokeWidth="1.6" />
-                    </>
-                  )}
-                </svg>
-              </button>
-            </div>
+            <PasswordInput
+              id="password"
+              value={password}
+              onChange={setPassword}
+              disabled={isLoading}
+              placeholder="At least 6 characters"
+              autoComplete="new-password"
+            />
           </div>
 
           <div>
@@ -229,7 +172,7 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-ink-muted">
+        <p className="mt-5 text-center text-sm text-ink-muted">
           Already have an account?{' '}
           <Link
             href="/login"
