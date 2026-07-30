@@ -3,9 +3,13 @@ import { validate } from '../middleware/validate';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
 import { createOrderSchema } from '../validators/order.validator';
+
+
 import {
   getAllOrders,
   getOrderById,
+  getMyOrders,
+  getRestaurantOrders,
   createOrder,
   updateOrder,
   deleteOrder,
@@ -30,6 +34,57 @@ const router = Router();
  *         description: Insufficient permissions
  */
 router.get('/', authenticate, authorize('ADMIN'), getAllOrders);
+
+
+/**
+ * @openapi
+ * /orders/my-orders:
+ *   get:
+ *     summary: Get the logged-in customer's own order history
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: The customer's orders, newest first
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
+ */
+router.get('/my-orders', authenticate, authorize('CUSTOMER'), getMyOrders);
+
+
+
+/**
+ * @openapi
+ * /orders/restaurant-orders:
+ *   get:
+ *     summary: Get incoming orders for the logged-in owner's restaurant
+ *     tags: [Orders]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Orders placed with the owner's restaurant, newest first
+ *       401:
+ *         description: No token provided
+ *       403:
+ *         description: Insufficient permissions
+ *       404:
+ *         description: No restaurant found for this account
+ */
+router.get( '/restaurant-orders',authenticate,authorize('RESTAURANT_OWNER', 'ADMIN'),getRestaurantOrders);
+ 
+
+
+
+
+
+
+
+
+
 
 /**
  * @openapi
@@ -136,6 +191,7 @@ router.post('/', authenticate, authorize('CUSTOMER'), validate(createOrderSchema
  *         description: Order not found
  */
 router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'RIDER', 'ADMIN'), updateOrder);
+
 
 /**
  * @openapi

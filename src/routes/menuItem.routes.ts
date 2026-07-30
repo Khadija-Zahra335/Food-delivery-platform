@@ -5,6 +5,7 @@ import { authorize } from '../middleware/authorize';
 import { createMenuItemSchema } from '../validators/menuItem.validator';
 import {
   getAllMenuItems,
+  getMenuByRestaurant,
   getMenuItemById,
   createMenuItem,
   updateMenuItem,
@@ -24,6 +25,24 @@ const router = Router();
  *         description: A list of menu items, each including its restaurant and category
  */
 router.get('/', getAllMenuItems);
+
+/**
+ * @openapi
+ * /menu-items/restaurant/{restaurantId}:
+ *   get:
+ *     summary: Get one restaurant's full menu (public)
+ *     tags: [MenuItems]
+ *     parameters:
+ *       - in: path
+ *         name: restaurantId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: The restaurant's menu items, each including its category
+ */
+router.get('/restaurant/:restaurantId', getMenuByRestaurant);
 
 /**
  * @openapi
@@ -83,7 +102,13 @@ router.get('/:id', getMenuItemById);
  *       403:
  *         description: Insufficient permissions
  */
-router.post('/', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), validate(createMenuItemSchema), createMenuItem);
+router.post(
+  '/',
+  authenticate,
+  authorize('RESTAURANT_OWNER', 'ADMIN'),
+  validate(createMenuItemSchema),
+  createMenuItem
+);
 
 /**
  * @openapi
@@ -113,8 +138,6 @@ router.post('/', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), validate(
  *                 type: number
  *               isAvailable:
  *                 type: boolean
- *               restaurantId:
- *                 type: integer
  *               categoryId:
  *                 type: integer
  *     responses:
@@ -127,7 +150,12 @@ router.post('/', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), validate(
  *       404:
  *         description: Menu item not found
  */
-router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), updateMenuItem);
+router.put(
+  '/:id',
+  authenticate,
+  authorize('RESTAURANT_OWNER', 'ADMIN'),
+  updateMenuItem
+);
 
 /**
  * @openapi
@@ -153,6 +181,11 @@ router.put('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), updateM
  *       404:
  *         description: Menu item not found
  */
-router.delete('/:id', authenticate, authorize('RESTAURANT_OWNER', 'ADMIN'), deleteMenuItem);
+router.delete(
+  '/:id',
+  authenticate,
+  authorize('RESTAURANT_OWNER', 'ADMIN'),
+  deleteMenuItem
+);
 
 export default router;
