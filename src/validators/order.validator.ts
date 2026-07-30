@@ -7,7 +7,8 @@ const orderItemSchema = z.object({
 });
 
 export const createOrderSchema = z.object({
-  customerId: z.number().int(),
   restaurantId: z.number().int(),
+  deliveryStreet: z.string().min(1, 'a delivery address is required'),
+  deliveryCity: z.string().min(1, 'a delivery city is required'),
   items: z.array(orderItemSchema).min(1, 'an order must contain at least one item'),
 });
