@@ -43,7 +43,7 @@ export default function LoginPage() {
       }
 
       login(data.token);
-      router.push('/dashboard');
+      router.push('/');
     } catch {
       setError('Could not reach the server. Check your connection and try again.');
     } finally {
