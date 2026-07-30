@@ -15,8 +15,9 @@ import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './swagger';
 
 import authRoutes from './routes/auth.routes';
+import addressRoutes from './routes/address.routes';
 import cors from 'cors';
-
+import reviewRoutes from './routes/review.routes';
 
 // Create an Express application
 const app = express();
@@ -42,6 +43,11 @@ app.use('/orders', orderRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/auth', authRoutes);
+
+app.use('/addresses', addressRoutes);
+app.use('/reviews', reviewRoutes);
+
+
 app.use(errorHandler);
 
 

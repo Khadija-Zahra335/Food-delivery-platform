@@ -14,11 +14,25 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, role },
+    const user = await prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: { name, email, password: hashedPassword, role },
+      });
+
+      // Customers get an ordering profile straight away, since addresses,
+      // orders and reviews all hang off it.
+      if (newUser.role === 'CUSTOMER') {
+        await tx.customer.create({
+          data: { name, email, userId: newUser.id },
+        });
+      }
+
+      // Restaurant owners create their restaurant separately, from the owner
+      // dashboard — an auto-created empty restaurant would be worse than none.
+
+      return newUser;
     });
 
-    // never send the password back, even hashed
     const { password: _, ...userWithoutPassword } = user;
 
     res.status(201).json(userWithoutPassword);
