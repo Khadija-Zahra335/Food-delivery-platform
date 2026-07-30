@@ -111,6 +111,10 @@ model Order{
   status  OrderStatus @default(PLACED)
   createdAt DateTime @default(now())
 
+  deliveryStreet String?
+  deliveryCity   String?
+
+
   orderitems       OrderItem[]
   reviews         Review[]
 
