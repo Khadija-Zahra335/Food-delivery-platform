@@ -31,6 +31,14 @@ const router = Router();
  */
 router.get('/', authenticate, authorize('ADMIN', 'RESTAURANT_OWNER'), getAllRiders);
 
+
+router.get(
+  '/available',
+  authenticate,
+  authorize('RESTAURANT_OWNER', 'ADMIN'),
+  getAllRiders
+);
+
 /**
  * @openapi
  * /riders/{id}:
