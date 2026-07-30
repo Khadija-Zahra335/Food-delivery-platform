@@ -1,4 +1,5 @@
-import Footer from "../../components/Footer";
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 
 export default function MainLayout({
   children,
@@ -7,7 +8,8 @@ export default function MainLayout({
 }) {
   return (
     <>
-      <div className="flex flex-1 flex-col">{children}</div>
+      <Navbar />
+      <div className="flex flex-1 flex-col bg-canvas">{children}</div>
       <Footer />
     </>
   );
