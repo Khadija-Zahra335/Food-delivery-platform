@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import prisma from '../prismaClient';
-
+import { AuthRequest } from '../middleware/authenticate';
 
 // Get all riders from the database  
 export const getAllRiders = async (req: Request, res: Response, next: NextFunction) => {
@@ -64,3 +64,28 @@ export const deleteRider = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
+
+/** Riders not currently on an active delivery. */
+export const getAvailableRiders = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const riders = await prisma.rider.findMany({
+      where: {
+        isAvailable: true,
+        orders: {
+          none: {
+            status: { in: ['PREPARING', 'OUT_FOR_DELIVERY'] },
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    res.status(200).json(riders);
+  } catch (err) {
+    next(err);
+  }
+};
