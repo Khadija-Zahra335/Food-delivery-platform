@@ -6,6 +6,19 @@ A full-stack food delivery platform supporting multiple independent restaurants,
 - **Customers** browse restaurants, view menus, place orders, track status, leave reviews, and manage delivery addresses
 - **Restaurant owners** manage their restaurant profile, menu and categories, and process incoming orders through to delivery
 
+
+## Live Demo
+
+- **Application:** https://food-delivery-platform-three.vercel.app
+- **API documentation:** https://fooddelivery-api-ao4m.onrender.com/api-docs
+
+The API runs on a free tier that sleeps after 15 minutes of inactivity, so the
+first request may take up to a minute while the service wakes up. Subsequent
+requests are fast.
+
+
+
+
 ## Tech Stack
 
 **Backend**
@@ -174,6 +187,32 @@ npm run dev -- -p 3001    # http://localhost:3001
 ```
 
 Both must run together. CORS on the backend permits requests from port 3001.
+
+## Deployment
+
+| Layer | Platform |
+| ------| ---------|
+| Database | [Neon](https://neon.tech) — serverless PostgreSQL |
+| Backend | [Render](https://render.com) — Node web service |
+| Frontend | [Vercel](https://vercel.com) — Next.js |
+
+Both applications deploy automatically from `main`.
+
+**Environment variables**
+
+Backend (Render):
+- `DATABASE_URL` — Neon connection string
+- `JWT_SECRET` — signing secret for tokens
+- `FRONTEND_URL` — deployed frontend origin, added to the CORS allow-list
+
+Frontend (Vercel):
+- `NEXT_PUBLIC_API_URL` — deployed backend URL
+
+The `NEXT_PUBLIC_` prefix is required for Next.js to expose a variable to browser
+code, and is a reminder that anything with it is public — secrets never go there.
+`PORT` is provided by Render automatically.
+
+
 
 ## API Documentation
 
