@@ -7,6 +7,7 @@ import { useAuth } from '../../../context/AuthContext';
 import BrandLogo from '../../../components/BrandLogo';
 import ErrorAlert from '../../../components/ErrorAlert';
 import PasswordInput from '../../../components/PasswordInput';
+import { api } from '@/lib/api';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -29,19 +30,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3000/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || 'Login failed');
-        return;
-      }
-
+      const data = await api.login({ email, password });
       login(data.token);
       router.push('/');
     } catch {

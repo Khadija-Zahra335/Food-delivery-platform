@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import BrandLogo from '../../../components/BrandLogo';
 import ErrorAlert from '../../../components/ErrorAlert';
 import PasswordInput from '../../../components/PasswordInput';
+import { api } from '@/lib/api';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -34,19 +35,7 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3000/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.message || 'Signup failed');
-        return;
-      }
-
+      await api.register({ name, email, password, role });
       router.push('/login');
     } catch {
       setError('Could not reach the server. Check your connection and try again.');

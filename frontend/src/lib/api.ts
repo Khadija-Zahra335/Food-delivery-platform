@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 /** Shape of every model the frontend reads from the backend. */
 export type Restaurant = {
@@ -118,6 +118,31 @@ export async function authFetch<T = unknown>(
 }
 
 export const api = {
+
+// login
+login: (body: { email: string; password: string }) =>
+    authFetch<{ token: string }>('/auth/login', null, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  register: (body: {
+    name: string;
+    email: string;
+    password: string;
+    role: string;
+  }) =>
+    authFetch<unknown>('/auth/register', null, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+
+
+
+
+
+
   // --- restaurants ---
   getRestaurants: (token: string | null) =>
     authFetch<Restaurant[]>('/restaurants', token),
