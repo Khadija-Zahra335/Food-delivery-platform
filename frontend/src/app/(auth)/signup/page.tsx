@@ -37,8 +37,14 @@ export default function SignupPage() {
     try {
       await api.register({ name, email, password, role });
       router.push('/login');
-    } catch {
-      setError('Could not reach the server. Check your connection and try again.');
+    }
+     catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      setError(
+        message.toLowerCase().includes('fetch')
+          ? 'Could not reach the server. Check your connection and try again.'
+          : message || 'Login failed'
+      );
     } finally {
       setIsLoading(false);
     }
