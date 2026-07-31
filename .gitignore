@@ -143,3 +143,6 @@ vite.config.ts.timestamp-*
 .vite/
 
 /generated/prisma
+
+#database dumps
+local-data.sql
