@@ -28,7 +28,12 @@ app.use(express.json());
 
 
 // Enable CORS for all routes
-app.use(cors({ origin: 'http://localhost:3001' }));
+const allowedOrigins = [
+  'http://localhost:3001',
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
+app.use(cors({ origin: allowedOrigins }));
 
 // Register the restaurant routes with the Express application
 // "Whenever a request starts with /restaurants, send it to restaurantRoutes.ts."
