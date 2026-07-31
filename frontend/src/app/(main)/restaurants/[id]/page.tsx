@@ -268,26 +268,7 @@ function RestaurantDetailContent() {
           ))}
         </section>
 
-          {/* New one */}
-
-          <section className="mt-10 border-t border-line pt-8">
-            <h2 className="text-xl font-semibold tracking-tight text-brand-900">
-              Reviews
-            </h2>
-
-            {reviews.length > 0 && (
-              <div className="mt-4">
-                <RatingSummary reviews={reviews} />
-              </div>
-            )}
-
-            <div className="mt-4">
-              <ReviewList
-                reviews={reviews}
-                emptyMessage="No reviews yet for this restaurant."
-              />
-            </div>
-          </section>
+          
 
 
 
@@ -396,8 +377,34 @@ function RestaurantDetailContent() {
               </>
             )}
           </div>
+
+           {/* Reviews */}
+
+          <section className="mt-10 border-t border-line pt-8">
+            <h2 className="text-xl font-semibold tracking-tight text-brand-900">
+              Reviews
+            </h2>
+
+            {reviews.length > 0 && (
+              <div className="mt-4">
+                <RatingSummary reviews={reviews} />
+              </div>
+            )}
+
+            <div className="mt-4">
+              <ReviewList
+                reviews={reviews}
+                emptyMessage="No reviews yet for this restaurant."
+              />
+            </div>
+          </section>
+
+
         </aside>
       </div>
+
+           
+
     </main>
   );
 }
