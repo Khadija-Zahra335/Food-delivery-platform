@@ -1,25 +1,22 @@
-# Food Delivery Platform
+# Foodly — Multi-Vendor Food Delivery Platform
 
-A simplified multi-vendor food delivery platform (in the spirit of Foodpanda / Uber Eats) supporting multiple independent restaurants, customer browsing and ordering, rider-based delivery, and post-order reviews.
+A full-stack food delivery platform supporting multiple independent restaurants, customer ordering, rider-based delivery, and post-order reviews. Built as a full-stack internship project across four phases: database design, REST API, authentication, and frontend.
 
-The repository implements three layers:
-
-1. **Database layer** — schema design, PostgreSQL implementation via Prisma, migrations, seed data
-2. **API layer** — a REST API built with Express + TypeScript in an MVC structure, with request validation, JWT authentication, role-based authorization, centralized error handling, and interactive documentation
-3. **Frontend layer** — a Next.js (App Router) client with authentication flows, token management, and protected routes
+**Two user roles, one application:**
+- **Customers** browse restaurants, view menus, place orders, track status, leave reviews, and manage delivery addresses
+- **Restaurant owners** manage their restaurant profile, menu and categories, and process incoming orders through to delivery
 
 ## Tech Stack
 
 **Backend**
-- PostgreSQL
-- [Prisma](https://www.prisma.io/) (`prisma-client-js` generator, `@prisma/adapter-pg` driver adapter)
+- PostgreSQL with [Prisma](https://www.prisma.io/) (`prisma-client-js`, `@prisma/adapter-pg`)
 - Node.js, [Express](https://expressjs.com/) 5, [TypeScript](https://www.typescriptlang.org/)
 - [Zod](https://zod.dev/) for request validation
-- [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) and [bcrypt](https://www.npmjs.com/package/bcrypt) for authentication
-- [Swagger (OpenAPI)](https://swagger.io/) via `swagger-jsdoc` + `swagger-ui-express`
+- [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) + [bcrypt](https://www.npmjs.com/package/bcrypt) for authentication
+- [Swagger / OpenAPI](https://swagger.io/) via `swagger-jsdoc` and `swagger-ui-express`
 
 **Frontend**
-- [Next.js](https://nextjs.org/) (App Router), React, TypeScript
+- [Next.js](https://nextjs.org/) App Router, React, TypeScript
 - [Tailwind CSS](https://tailwindcss.com/)
 - React Context for auth state, cookies for token persistence
 
@@ -28,158 +25,175 @@ The repository implements three layers:
 ```
 food-delivery-platform/
 ├── prisma/
-│   ├── schema.prisma          # Data model: 10 tables, relationships, enums
-│   ├── migrations/            # Version-controlled schema migrations
-│   ├── seed.js                 # Populates the database with sample data
-│   ├── crud.js                  # Standalone CRUD scripts (pre-API reference/testing)
+│   ├── schema.prisma          # 10 models, relationships, enums
+│   ├── migrations/            # Version-controlled schema history
+│   ├── seed.js                 # Sample data for all tables
+│   ├── crud.js                  # Standalone CRUD scripts (pre-API reference)
 │   └── README.md                # Database layer documentation
-├── src/                          # Backend API
-│   ├── controllers/             # Business logic — one file per resource
-│   ├── routes/                   # URL + method → controller mapping, with Swagger docs
-│   ├── validators/              # Zod schemas describing valid request bodies
+├── src/                            # Backend API
+│   ├── controllers/               # Business logic, one file per resource
+│   ├── routes/                     # URL + method → controller, with Swagger docs
+│   ├── validators/                # Zod schemas for request bodies
 │   ├── middleware/
-│   │   ├── validate.ts           # Reusable request validation middleware
-│   │   ├── authenticate.ts        # Verifies JWTs and attaches the user to the request
-│   │   ├── authorize.ts            # Role-based access control
-│   │   └── errorHandler.ts          # Centralized error handling middleware
-│   ├── prismaClient.ts            # Single shared Prisma client instance
-│   ├── swagger.ts                  # OpenAPI/Swagger configuration
-│   ├── app.ts                       # Express app setup, middleware, route registration
-│   └── server.ts                     # Entry point — starts the HTTP server
-├── frontend/                          # Next.js client
-│   ├── public/images/                # Static assets
+│   │   ├── validate.ts             # Reusable request validation
+│   │   ├── authenticate.ts          # Verifies JWTs, attaches req.user
+│   │   ├── authorize.ts              # Role-based access control
+│   │   └── errorHandler.ts            # Centralised error handling
+│   ├── lib/ownership.ts               # Resolves which records belong to a user
+│   ├── prismaClient.ts                 # Single shared Prisma client
+│   ├── swagger.ts                       # OpenAPI configuration
+│   ├── app.ts                            # Express setup and route registration
+│   └── server.ts                          # Entry point
+├── frontend/                                # Next.js client
 │   └── src/
 │       ├── app/
-│       │   ├── layout.tsx             # Root layout — fonts, AuthProvider
-│       │   ├── globals.css             # Tailwind setup and brand theme tokens
-│       │   ├── (auth)/                  # Route group: login and signup (no footer)
-│       │   └── (main)/                   # Route group: app pages (with footer)
-│       ├── components/                     # BrandLogo, ErrorAlert, PasswordInput, Footer, ProtectedRoute
-│       ├── context/AuthContext.tsx          # Token state, login/logout, cookie persistence
-│       └── lib/api.ts                        # authFetch — attaches the JWT to requests
-├── ERD.svg                             # Entity-Relationship Diagram, generated from schema.prisma
-├── package.json                         # Backend dependencies
+│       │   ├── layout.tsx                  # Root layout, fonts, AuthProvider
+│       │   ├── page.tsx                     # Front door — redirects by role
+│       │   ├── (auth)/                       # login, signup (no navbar/footer)
+│       │   └── (main)/                        # app pages (navbar + footer)
+│       │       ├── restaurants/                # browse + [id] menu and cart
+│       │       ├── orders/                      # history + [id] detail and reviews
+│       │       ├── addresses/                    # saved delivery addresses
+│       │       └── owner/                         # profile, menu, orders
+│       ├── components/                             # Shared UI and route guards
+│       ├── context/AuthContext.tsx                  # Token, role, login/logout
+│       └── lib/api.ts                                # Typed client for every endpoint
+├── ERD.svg                                  # Generated from schema.prisma
+├── package.json                              # Backend dependencies
 └── prisma.config.ts
 ```
 
-Note the backend and frontend are separate applications sharing one repository, each with its own `package.json` and dependencies.
+Backend and frontend are separate applications sharing one repository, each with its own `package.json`.
 
 ## Data Model
 
-10 entities: **User**, **Restaurant**, **Category**, **MenuItem**, **Customer**, **Address**, **Rider**, **Order**, **OrderItem** (junction table), **Review**.
+Ten entities: **User**, **Restaurant**, **Category**, **MenuItem**, **Customer**, **Address**, **Rider**, **Order**, **OrderItem**, **Review**.
 
-`User` handles authentication for everyone who logs in, with a `Role` enum (`CUSTOMER`, `RESTAURANT_OWNER`, `RIDER`, `ADMIN`) driving authorization. It links one-to-one to `Customer`, `Restaurant`, or `Rider` depending on who the user is — keeping login concerns in one table rather than duplicated across three.
+`User` handles authentication for everyone who logs in, with a `Role` enum (`CUSTOMER`, `RESTAURANT_OWNER`, `RIDER`, `ADMIN`) driving authorization. It links one-to-one to `Customer`, `Restaurant`, or `Rider` depending on who the user is — keeping login concerns in one table rather than duplicated across three. Registering as a customer creates the `User` and `Customer` records together in a transaction.
 
-Full design reasoning and relationship justification are documented in [`prisma/README.md`](./prisma/README.md).
+Full design reasoning is in [`prisma/README.md`](./prisma/README.md).
 
-## API Architecture (MVC)
+### Design decisions worth noting
 
-Every request follows the same path:
+**Orders snapshot values rather than referencing them.** `OrderItem.priceAtOrder` captures the price when the order was placed, and `Order.deliveryStreet`/`deliveryCity` capture the address. An order is a historical record — editing a menu price or deleting a saved address must never rewrite what already happened.
+
+**`OrderItem` is a junction table.** One order contains many items and one item appears in many orders, so neither side can hold a foreign key to the other. Each `OrderItem` row records one pairing, with its quantity and price.
+
+**Reviews use a `targetType` field** rather than separate rating columns, so an order can have zero, one, or two reviews (restaurant and/or rider) with every row meaning the same thing.
+
+**Orders are never deleted.** `DELETE /orders/:id` returns `403`. Cancelling is a status change, which preserves order history.
+
+## API Architecture
+
+Every request follows the same path, and any layer can stop it:
 
 ```
 Request → Route → authenticate → authorize → validate → Controller → Prisma → Response
 ```
 
-- **Routes** (`src/routes/`) map URL + HTTP method to a controller, and declare which middleware applies. No business logic.
-- **Middleware** runs in order, and any layer can stop the request early: `authenticate` (401 if the token is missing or invalid), `authorize` (403 if the role isn't permitted), `validate` (400 if the body is malformed).
-- **Controllers** (`src/controllers/`) hold the logic — reading the request, calling Prisma, shaping the response, and forwarding unexpected errors via `next(err)`.
-- **Model** — `schema.prisma` and the Prisma client. There's no View layer; this is a JSON-only API.
+- **Routes** map URL + method to a controller and declare which middleware applies. No business logic.
+- **`authenticate`** verifies the JWT signature and attaches `req.user`. Returns `401` when missing or invalid.
+- **`authorize(...roles)`** checks the role against what the endpoint permits. Returns `403`.
+- **`validate(schema)`** checks the request body against a Zod schema. Returns `400` with structured issues.
+- **Controllers** hold the logic and forward unexpected errors via `next(err)`.
+- **`errorHandler`** catches those and maps [Prisma error codes](https://www.prisma.io/docs/orm/reference/error-reference) (`P2002`, `P2025`, `P2003`) to appropriate HTTP statuses, falling back to `500`.
 
-### Authentication & Authorization
+### Authentication and authorization
 
-- `POST /auth/register` — hashes the password with bcrypt and creates a user
-- `POST /auth/login` — verifies the password with `bcrypt.compare` and returns a signed JWT containing `{ userId, role }`, valid for 24 hours
+- `POST /auth/register` — hashes the password with bcrypt, creates the user (and a `Customer` profile for customers)
+- `POST /auth/login` — verifies with `bcrypt.compare`, returns a JWT containing `{ userId, role }`, valid 24 hours
 
-Protected endpoints expect the token as `Authorization: Bearer <token>`. The `authenticate` middleware verifies the signature and attaches the decoded payload to `req.user`; `authorize(...roles)` then checks that role against what the endpoint permits.
+Protected endpoints expect `Authorization: Bearer <token>`.
 
-Examples of the resulting policy:
-- Menu management (`POST`/`PUT`/`DELETE` on `/menu-items`) — restaurant owners and admins only
-- Order placement (`POST /orders`) — customers only
-- Browsing restaurants, menus, and categories (`GET`) — public, no token required
+**Two distinct layers of access control:**
 
-### Request Validation
+1. **Role gating** — is this user the right *kind* of user? Menu management is owners only; placing an order is customers only.
+2. **Ownership checks** — is this specific record *theirs*? Before any edit or delete, the controller loads the record and compares its owner against the identity in the verified token. An owner cannot touch another restaurant's menu or orders; a customer cannot see another customer's addresses or order history.
 
-Every `POST` endpoint validates its body against a [Zod](https://zod.dev/) schema before reaching the controller, via a reusable `validate(schema)` middleware. Invalid requests get a `400` with a structured list of issues, without touching the database. Frontend validation exists for user experience; this backend validation is what actually enforces the rules.
-
-### Centralized Error Handling
-
-A single error-handling middleware (`src/middleware/errorHandler.ts`) catches errors forwarded from any controller and returns a consistent JSON shape. It maps [Prisma's known error codes](https://www.prisma.io/docs/orm/reference/error-reference) (`P2002` unique constraint, `P2025` record not found, `P2003`/`P2004` foreign key conflicts) to appropriate HTTP statuses, falling back to `500`.
+**Identity always comes from the token, never the request body.** `customerId` is resolved server-side from `req.user`, so a client cannot act as someone else.
 
 ### Endpoints
 
-Six resources (`/restaurants`, `/menu-items`, `/categories`, `/customers`, `/riders`, `/orders`) expose standard REST CRUD, plus `/auth` for register and login.
+| Resource | Notable endpoints |
+|---|---|
+| `/auth` | `POST /register`, `POST /login` |
+| `/restaurants` | Public browse and detail; `GET /my-restaurant` for owners; create/update/delete ownership-checked |
+| `/menu-items` | `GET /restaurant/:id` for a restaurant's full menu (public); CRUD ownership-checked |
+| `/categories` | Public read; owner/admin write |
+| `/orders` | `GET /my-orders` (customer), `GET /restaurant-orders` (owner), `POST /` (customer, transactional), `PUT /:id` (status and rider) |
+| `/addresses` | Full CRUD, scoped to the logged-in customer |
+| `/reviews` | `GET /restaurant/:id` (public), `POST /` (customer, delivered orders only) |
+| `/riders` | `GET /available` — riders not currently on an active delivery |
 
-| Method | Path | Action |
-|---|---|---|
-| GET | `/{resource}` | List all |
-| GET | `/{resource}/:id` | Get one by ID |
-| POST | `/{resource}` | Create |
-| PUT | `/{resource}/:id` | Update |
-| DELETE | `/{resource}/:id` | Delete |
-
-Notable exceptions, driven by data-integrity and business rules:
-- `DELETE /restaurants/:id` and `DELETE /categories/:id` return `409 Conflict` if dependent `MenuItem` rows still exist.
-- `DELETE /orders/:id` always returns `403 Forbidden` — orders are historical records and should be cancelled via `PUT` (status → `CANCELLED`), never deleted.
-- `POST /orders` creates an `Order` and its `OrderItem` rows together inside a Prisma `$transaction`, guaranteeing atomicity.
+**Business rules enforced server-side:**
+- An order and its items are created together in a `$transaction` — all or nothing
+- A review requires a delivered order the customer actually placed, one per target, and a rider review requires an assigned rider
+- A rider can only be on one active delivery at a time
+- A restaurant with menu items cannot be deleted (`409`)
 
 ## Frontend Architecture
 
-**Auth state** lives in `AuthContext`, wrapping the whole app from the root layout. It holds the token in React state (for reactivity — components re-render when it changes) and mirrors it to a cookie (for persistence across refreshes). On startup, an effect reads the cookie back into state, so a refresh doesn't log the user out.
+**Routing.** File-based, using route groups so auth pages and app pages get different layouts without affecting URLs. Dynamic segments (`restaurants/[id]`, `orders/[id]`) serve one page per record.
 
-**Route protection** is handled by the `ProtectedRoute` wrapper, which reads the token from context and refuses to render its children without one, redirecting to `/login` via an effect. It waits on an `isLoading` flag so a logged-in user isn't wrongly redirected before the cookie has been checked.
+**Auth state.** `AuthContext` holds the token in React state (for reactivity) and mirrors it to a cookie (for persistence across refreshes). It decodes the JWT payload to read the user's role — safe because it drives UI only, never access to data. On startup an effect restores the token from the cookie back into state.
 
-**Authenticated requests** go through `lib/api.ts`, which attaches `Authorization: Bearer <token>` automatically — the frontend counterpart to the backend's `authenticate` middleware.
+**Route protection.** `ProtectedRoute` accepts an optional `allowedRoles`. It refuses to render its children without a valid token, and redirects a wrong-role user to their own home rather than to login. An `isLoading` flag prevents a false redirect before the cookie has been read.
 
-**Route groups** (`(auth)` and `(main)`) let auth pages and app pages use different layouts without affecting URLs — login and signup render without the footer, everything else with it.
+**Data fetching.** All client-side, through a typed `lib/api.ts` that attaches the token automatically. Pages that need several resources fetch them in parallel with `Promise.all`. Every page handles loading, error, and empty states explicitly.
+
+**The frontend gates the UI; the backend gates the data.** Role-aware navigation and route guards are user experience. They are bypassable, and it does not matter — every request is independently verified server-side.
 
 ## Getting Started
 
 ### Prerequisites
-
 - Node.js
-- PostgreSQL (running locally or accessible via connection string)
+- PostgreSQL
 
 ### Backend
 
 ```bash
 npm install
 
-# .env should contain:
-# DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE_NAME?schema=public"
+# .env:
+# DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
 # JWT_SECRET="a-long-random-secret"
 
 npx prisma migrate dev
 npx prisma generate
 node prisma/seed.js
 
-npm run dev
+npm run dev          # http://localhost:3000
 ```
-
-Runs at `http://localhost:3000`.
 
 ### Frontend
 
 ```bash
 cd frontend
 npm install
-npm run dev -- -p 3001
+npm run dev -- -p 3001    # http://localhost:3001
 ```
 
-Runs at `http://localhost:3001`. Both need to be running at once — the frontend calls the backend, and the backend's CORS config permits requests from port 3001.
+Both must run together. CORS on the backend permits requests from port 3001.
 
 ## API Documentation
 
-With the backend running, visit `http://localhost:3000/api-docs` for interactive Swagger UI — browse every endpoint, see request/response shapes and validation rules, and send live test requests from the browser. Use the **Authorize** button to paste a JWT once and have it attached to all protected endpoints automatically.
+With the backend running, visit **`http://localhost:3000/api-docs`** for interactive Swagger UI — every endpoint with request/response shapes and validation rules, testable from the browser. Use the **Authorize** button to paste a JWT once and have it attached to protected endpoints.
 
 ## Entity-Relationship Diagram
 
-See [`ERD.svg`](./ERD.svg), auto-generated directly from `schema.prisma` via `prisma-erd-generator`, so it stays in sync with the actual schema.
+See [`ERD.svg`](./ERD.svg), generated directly from `schema.prisma` via `prisma-erd-generator`, so it stays in sync with the real schema.
 
-## Scope
+## Scope and Known Limitations
 
-**Implemented:** database schema, migrations and seed data; full REST CRUD API with MVC structure; JWT authentication and role-based authorization; request validation; centralized error handling; API documentation; frontend authentication flows with protected routes.
+**Implemented:** database schema and migrations; full REST API with MVC structure; JWT authentication with role-based and ownership-based authorization; request validation; centralised error handling; API documentation; complete customer and restaurant-owner frontends.
 
-**Not yet implemented:** payments/billing, real-time order tracking, ownership-level authorization (currently any restaurant owner can edit any restaurant, not only their own), full customer-facing ordering UI.
+**Deliberately out of scope:** payments and billing, real-time order tracking, rider-facing views.
+
+**Known limitations, noted rather than hidden:**
+- Menu items and restaurants have no image field yet — the frontend uses placeholder imagery keyed on record id
+- Categories are platform-wide rather than per-restaurant, so deleting one can affect other restaurants' items (guarded by a `409`, but a per-restaurant model would be cleaner)
+- No pagination on any list endpoint — fine at current data volumes, would need addressing at scale
+- Customers cannot cancel their own orders; only owners can
 
 ## License
 
