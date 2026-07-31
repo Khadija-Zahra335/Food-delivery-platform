@@ -11,7 +11,7 @@ export default function Footer() {
 
         <nav className="flex items-center gap-6">
           <Link
-            href="/about"
+            href="https://khadijazahra-portfolio.vercel.app/"
             className="text-white text-md font-semibold underline-offset-4 transition hover:text-white hover:underline"
           >
             About
