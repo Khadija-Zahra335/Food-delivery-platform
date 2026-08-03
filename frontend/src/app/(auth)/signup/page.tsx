@@ -134,7 +134,6 @@ export default function SignupPage() {
             >
               <option value="CUSTOMER">Customer</option>
               <option value="RESTAURANT_OWNER">Restaurant owner</option>
-              <option value="RIDER">Rider</option>
             </select>
           </div>
 
